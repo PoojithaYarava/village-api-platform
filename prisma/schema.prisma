@@ -1,0 +1,169 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  CLIENT
+}
+
+enum UserStatus {
+  PENDING_APPROVAL
+  ACTIVE
+  SUSPENDED
+}
+
+enum PlanType {
+  FREE
+  PREMIUM
+  PRO
+  UNLIMITED
+}
+
+enum ApiKeyStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+}
+
+model Country {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  states    State[]
+}
+
+model State {
+  id          String            @id @default(cuid())
+  code        String
+  name        String
+  region      String?
+  countryId   String
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  country     Country           @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  districts   District[]
+  userAccess  UserStateAccess[]
+
+  @@unique([countryId, code])
+  @@index([name])
+}
+
+model District {
+  id           String        @id @default(cuid())
+  code         String
+  name         String
+  stateId      String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  state        State         @relation(fields: [stateId], references: [id], onDelete: Cascade)
+  subDistricts SubDistrict[]
+
+  @@unique([stateId, code])
+  @@index([name])
+}
+
+model SubDistrict {
+  id         String    @id @default(cuid())
+  code       String
+  name       String
+  districtId String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  district   District  @relation(fields: [districtId], references: [id], onDelete: Cascade)
+  villages   Village[]
+
+  @@unique([districtId, code])
+  @@index([name])
+}
+
+model Village {
+  id             String      @id @default(cuid())
+  code           String
+  name           String
+  rawName        String
+  normalizedName String
+  sourceFile     String?
+  isCanonical    Boolean     @default(true)
+  subDistrictId  String
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  subDistrict    SubDistrict @relation(fields: [subDistrictId], references: [id], onDelete: Cascade)
+
+  @@unique([subDistrictId, code, rawName])
+  @@index([code])
+  @@index([name])
+  @@index([normalizedName])
+}
+
+model User {
+  id            String            @id @default(cuid())
+  email         String            @unique
+  businessName  String
+  gstNumber     String?
+  phoneNumber   String
+  passwordHash  String
+  role          UserRole          @default(CLIENT)
+  status        UserStatus        @default(PENDING_APPROVAL)
+  planType      PlanType          @default(FREE)
+  dailyLimit    Int               @default(5000)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  apiKeys       ApiKey[]
+  stateAccess   UserStateAccess[]
+  apiLogs       ApiLog[]
+}
+
+model ApiKey {
+  id           String       @id @default(cuid())
+  userId       String
+  name         String
+  key          String       @unique
+  secretHash   String
+  status       ApiKeyStatus @default(ACTIVE)
+  expiresAt    DateTime?
+  lastUsedAt   DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  apiLogs      ApiLog[]
+
+  @@index([userId, status])
+}
+
+model UserStateAccess {
+  id        String   @id @default(cuid())
+  userId    String
+  stateId   String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  state     State    @relation(fields: [stateId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, stateId])
+}
+
+model ApiLog {
+  id            String   @id @default(cuid())
+  apiKeyId      String
+  userId        String
+  endpoint      String
+  method        String
+  statusCode    Int
+  responseTime  Int
+  ipAddress     String?
+  requestCount  Int      @default(1)
+  createdAt     DateTime @default(now())
+  apiKey        ApiKey   @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([userId, createdAt])
+  @@index([apiKeyId, createdAt])
+}

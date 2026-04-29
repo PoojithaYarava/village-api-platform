@@ -1,0 +1,39 @@
+{
+  "source_dataset_version": "all-india-villages-master-list-excel.zip",
+  "summary": {
+    "raw_rows": 625880,
+    "state_rows": 30,
+    "district_rows": 586,
+    "subdistrict_rows": 5764,
+    "village_rows": 619500,
+    "state_count": 30,
+    "district_count": 586,
+    "subdistrict_count": 5764,
+    "village_count": 619500,
+    "duplicate_village_code_groups": 232,
+    "duplicate_village_code_rows": 507,
+    "repaired_rows": 1
+  },
+  "data_quality": {
+    "double_space_area_name_rows": 11407,
+    "og_marker_rows": 915,
+    "part_marker_rows": 957,
+    "rural_marker_rows": 564,
+    "ward_marker_rows": 4
+  },
+  "repair_log": [
+    {
+      "source_file": "Rdir_2011_18_ASSAM.xls",
+      "source_row_number": 277916,
+      "village_code": "302048",
+      "village_name": "Kharija Dalaigaon Pt.2 (Part)",
+      "imputed_subdistrict_code": "02110",
+      "imputed_subdistrict_name": "Bongaigaon (Pt)"
+    }
+  ],
+  "notes": [
+    "The dataset is census-era and contains 30 state or union-territory files, not the current live administrative map of India.",
+    "Rows with village code 000000 are hierarchy placeholders for state, district, or sub-district and are excluded from the final village master output.",
+    "Duplicate village codes were preserved in the cleaned village dataset and surfaced in a separate conflict report instead of being silently dropped."
+  ]
+}
