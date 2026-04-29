@@ -1,12 +1,40 @@
-const { states } = require("../data/mockGeography");
+const { config } = require("../config");
+const { states: mockStates } = require("../data/mockGeography");
+const csvRepository = require("../data/csvGeographyRepository");
 
-const country = {
+const fallbackCountry = {
   id: "country_in",
   code: "IN",
   name: "India",
 };
 
+let activeRepository;
+
+function getRepository() {
+  if (activeRepository) return activeRepository;
+
+  if (config.useProcessedCsv && csvRepository.isAvailable()) {
+    try {
+      activeRepository = csvRepository.loadRepository();
+      return activeRepository;
+    } catch (error) {
+      console.warn(`Processed CSV data unavailable, using mock geography: ${error.message}`);
+    }
+  }
+
+  activeRepository = {
+    country: fallbackCountry,
+    states: mockStates,
+    summary: {},
+    source: "mock",
+  };
+
+  return activeRepository;
+}
+
 function buildVillagePayload(state, district, subDistrict, village) {
+  const { country } = getRepository();
+
   return {
     value: village.id,
     label: village.name,
@@ -23,6 +51,8 @@ function buildVillagePayload(state, district, subDistrict, village) {
 }
 
 function getStates() {
+  const { states } = getRepository();
+
   return states.map(({ districts, ...state }) => ({
     ...state,
     districtCount: districts.length,
@@ -30,6 +60,7 @@ function getStates() {
 }
 
 function getDistrictsByState(stateId) {
+  const { states } = getRepository();
   const state = states.find((item) => item.id === stateId || item.code === stateId);
   if (!state) return [];
 
@@ -41,6 +72,8 @@ function getDistrictsByState(stateId) {
 }
 
 function getSubDistrictsByDistrict(districtId) {
+  const { states } = getRepository();
+
   for (const state of states) {
     const district = state.districts.find(
       (item) => item.id === districtId || item.code === districtId
@@ -59,6 +92,8 @@ function getSubDistrictsByDistrict(districtId) {
 }
 
 function getVillagesBySubDistrict(subDistrictId, page = 1, limit = 20) {
+  const { states } = getRepository();
+
   for (const state of states) {
     for (const district of state.districts) {
       const subDistrict = district.subDistricts.find(
@@ -91,6 +126,7 @@ function searchVillages({
   subDistrict: subDistrictFilter,
   limit = 10,
 }) {
+  const { states } = getRepository();
   const query = q.trim().toLowerCase();
   const results = [];
 
@@ -158,6 +194,7 @@ function getAutocomplete(q = "", hierarchyLevel = "village") {
 }
 
 function getPlatformSnapshot() {
+  const { country, source, states, summary } = getRepository();
   const districtCount = states.reduce((total, state) => total + state.districts.length, 0);
   const subDistrictCount = states.reduce(
     (total, state) =>
@@ -180,10 +217,11 @@ function getPlatformSnapshot() {
   return {
     coverage: {
       country,
-      states: states.length,
-      districts: districtCount,
-      subDistricts: subDistrictCount,
-      villages: villageCount,
+      states: summary.state_count || states.length,
+      districts: summary.district_count || districtCount,
+      subDistricts: summary.subdistrict_count || subDistrictCount,
+      villages: summary.village_count || villageCount,
+      dataSource: source,
     },
     performance: {
       p95ResponseMs: 84,
@@ -206,5 +244,6 @@ module.exports = {
   getStates,
   getSubDistrictsByDistrict,
   getVillagesBySubDistrict,
+  getRepository,
   searchVillages,
 };

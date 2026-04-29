@@ -1,16 +1,17 @@
 function respond(res, payload, status = 200, meta = {}) {
+  const rateLimit = {
+    remaining: Number(res.getHeader("RateLimit-Remaining")) || undefined,
+    limit: Number(res.getHeader("RateLimit-Limit")) || undefined,
+    reset: res.getHeader("RateLimit-Reset") || undefined,
+  };
+
   return res.status(status).json({
     success: status < 400,
     count: Array.isArray(payload) ? payload.length : meta.count || undefined,
     data: payload,
     meta: {
       requestId: res.locals.requestId,
-      responseTime: meta.responseTime || 0,
-      rateLimit: meta.rateLimit || {
-        remaining: 4900,
-        limit: 5000,
-        reset: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
-      },
+      rateLimit: meta.rateLimit || rateLimit,
       ...meta.extra,
     },
   });

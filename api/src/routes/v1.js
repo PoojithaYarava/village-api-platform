@@ -12,6 +12,12 @@ const { respond } = require("../utils/respond");
 
 const router = express.Router();
 
+function toPositiveInt(value, fallback, max = 100) {
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isFinite(parsed) || parsed < 1) return fallback;
+  return Math.min(parsed, max);
+}
+
 router.get("/", (req, res) => {
   respond(res, {
     name: "Village API Platform",
@@ -37,8 +43,8 @@ router.get("/districts/:id/subdistricts", (req, res) => {
 });
 
 router.get("/subdistricts/:id/villages", (req, res) => {
-  const page = Number(req.query.page || 1);
-  const limit = Number(req.query.limit || 20);
+  const page = toPositiveInt(req.query.page, 1, 100000);
+  const limit = toPositiveInt(req.query.limit, 20, 100);
   const result = getVillagesBySubDistrict(req.params.id, page, limit);
   respond(res, result.data, 200, {
     count: result.total,
@@ -53,7 +59,7 @@ router.get("/subdistricts/:id/villages", (req, res) => {
 });
 
 router.get("/search", (req, res) => {
-  const limit = Number(req.query.limit || 10);
+  const limit = toPositiveInt(req.query.limit, 10, 50);
   const data = searchVillages({
     q: req.query.q || "",
     state: req.query.state,

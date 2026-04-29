@@ -47,10 +47,14 @@ cp .env.example .env
 Important variables:
 
 - `API_PORT`: API server port, default `3000`
+- `PORT`: production host port, used automatically when present
 - `VITE_API_BASE_URL`: frontend API base URL, default `http://localhost:3000/api/v1`
+- `FRONTEND_URL`: public frontend URL shown by the API root response
+- `CORS_ORIGINS`: comma-separated list of allowed frontend origins
 - `DATABASE_URL`: PostgreSQL connection string for Prisma-backed work
 - `REDIS_URL`: Redis connection string for future rate limiting and analytics
 - `JWT_SECRET`: secret used by future auth flows
+- `USE_PROCESSED_CSV`: set to `false` to force mock geography data
 
 ## Quick start
 
@@ -87,6 +91,7 @@ npm run start
 ## API endpoints
 
 Current geography routes are backed by mock-ready service data while the Prisma repository layer is being connected.
+When `data/processed/villages_clean.csv` is available through Git LFS, the API loads the cleaned CSV geography dataset. If the LFS file has not been pulled, the API falls back to the bundled mock geography sample.
 
 ```text
 GET /api/v1
