@@ -187,6 +187,7 @@ function getAutocomplete(q = "", hierarchyLevel = "village") {
   return searchVillages({ q, limit: 8 }).map((item) => ({
     value: item.value,
     label: `${item.label} (${item.hierarchy.subDistrict}, ${item.hierarchy.district}, ${item.hierarchy.state})`,
+    code: item.code,
     fullAddress: item.fullAddress,
     hierarchy: item.hierarchy,
     hierarchyLevel: "village",

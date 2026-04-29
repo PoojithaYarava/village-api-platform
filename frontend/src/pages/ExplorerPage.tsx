@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowUpRight, Search } from "lucide-react";
+import { ArrowUpRight, Copy, Landmark, MapPinned, Route, Search } from "lucide-react";
 import { searchVillages } from "../api";
 import type { VillageOption } from "../types";
 
@@ -7,6 +7,27 @@ export function ExplorerPage() {
   const [query, setQuery] = useState("ma");
   const [results, setResults] = useState<VillageOption[]>([]);
   const [selected, setSelected] = useState<VillageOption | null>(null);
+
+  const selectedEndpoint = selected
+    ? `/api/v1/search?q=${encodeURIComponent(selected.hierarchy.village)}&limit=1`
+    : "/api/v1/search?q=ma&limit=1";
+
+  const selectedPayload = selected
+    ? JSON.stringify(
+        {
+          id: selected.value,
+          villageCode: selected.code || "not provided",
+          village: selected.hierarchy.village,
+          subDistrict: selected.hierarchy.subDistrict,
+          district: selected.hierarchy.district,
+          state: selected.hierarchy.state,
+          country: selected.hierarchy.country,
+          fullAddress: selected.fullAddress,
+        },
+        null,
+        2
+      )
+    : "";
 
   useEffect(() => {
     let ignore = false;
@@ -64,6 +85,7 @@ export function ExplorerPage() {
               type="button"
               className={selected?.value === item.value ? "result-row result-button active" : "result-row result-button"}
               onClick={() => setSelected(item)}
+              aria-pressed={selected?.value === item.value}
             >
               <div>
                 <strong>{item.label}</strong>
@@ -90,13 +112,75 @@ export function ExplorerPage() {
         </div>
         {selected ? (
           <div className="detail-card">
-            <p className="panel-kicker">Selected village</p>
-            <h3>{selected.hierarchy.village}</h3>
-            <div className="card-lines">
-              <p>Sub-District: {selected.hierarchy.subDistrict}</p>
-              <p>District: {selected.hierarchy.district}</p>
-              <p>State: {selected.hierarchy.state}</p>
-              <p>Country: {selected.hierarchy.country}</p>
+            <div className="detail-heading">
+              <div>
+                <p className="panel-kicker">Selected village</p>
+                <h3>{selected.hierarchy.village}</h3>
+              </div>
+              <span className="detail-code">{selected.code || "Code pending"}</span>
+            </div>
+
+            <div className="detail-address">
+              <MapPinned size={18} />
+              <p>{selected.fullAddress}</p>
+            </div>
+
+            <div className="detail-grid">
+              <div>
+                <span>Village ID</span>
+                <strong>{selected.value}</strong>
+              </div>
+              <div>
+                <span>Village Code</span>
+                <strong>{selected.code || "Not provided"}</strong>
+              </div>
+              <div>
+                <span>Sub-District</span>
+                <strong>{selected.hierarchy.subDistrict}</strong>
+              </div>
+              <div>
+                <span>District</span>
+                <strong>{selected.hierarchy.district}</strong>
+              </div>
+              <div>
+                <span>State</span>
+                <strong>{selected.hierarchy.state}</strong>
+              </div>
+              <div>
+                <span>Country</span>
+                <strong>{selected.hierarchy.country}</strong>
+              </div>
+            </div>
+
+            <div className="hierarchy-path" aria-label="Selected village hierarchy">
+              <span>{selected.hierarchy.country}</span>
+              <Route size={14} />
+              <span>{selected.hierarchy.state}</span>
+              <Route size={14} />
+              <span>{selected.hierarchy.district}</span>
+              <Route size={14} />
+              <span>{selected.hierarchy.subDistrict}</span>
+              <Route size={14} />
+              <span>{selected.hierarchy.village}</span>
+            </div>
+
+            <div className="detail-actions">
+              <a className="inline-link-button" href={selectedEndpoint} target="_blank" rel="noreferrer">
+                <Landmark size={16} />
+                Open API query
+              </a>
+              <button
+                className="inline-link-button"
+                type="button"
+                onClick={() => navigator.clipboard?.writeText(selectedPayload)}
+              >
+                <Copy size={16} />
+                Copy payload
+              </button>
+            </div>
+
+            <div className="code-card detail-json">
+              <code>{selectedPayload}</code>
             </div>
           </div>
         ) : null}

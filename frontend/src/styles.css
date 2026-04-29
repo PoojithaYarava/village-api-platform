@@ -751,6 +751,105 @@ button {
   padding: 18px;
 }
 
+.detail-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.detail-heading h3 {
+  margin: 6px 0 0;
+  font-size: 1.45rem;
+}
+
+.detail-code {
+  border: 1px solid rgba(25, 76, 71, 0.18);
+  background: rgba(25, 76, 71, 0.08);
+  color: var(--forest);
+  padding: 8px 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.detail-address {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: start;
+  padding: 12px;
+  margin-bottom: 14px;
+  background: rgba(201, 109, 68, 0.08);
+  border: 1px solid rgba(201, 109, 68, 0.16);
+}
+
+.detail-address p {
+  margin: 0;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.detail-grid div {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid rgba(67, 56, 45, 0.1);
+  background: rgba(255, 252, 247, 0.62);
+}
+
+.detail-grid span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.detail-grid strong {
+  display: block;
+}
+
+.hierarchy-path {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 14px;
+  color: var(--muted);
+}
+
+.hierarchy-path span {
+  padding: 6px 8px;
+  border: 1px solid rgba(67, 56, 45, 0.1);
+  background: rgba(255, 252, 247, 0.58);
+}
+
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.detail-actions .inline-link-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-json {
+  margin-top: 14px;
+}
+
+.detail-json code {
+  white-space: pre-wrap;
+}
+
 .code-card code {
   display: block;
   font-size: 0.95rem;
@@ -1025,6 +1124,14 @@ button {
     align-items: flex-start;
     flex-direction: column;
     gap: 6px;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-heading {
+    display: grid;
   }
 
   .credential-name {

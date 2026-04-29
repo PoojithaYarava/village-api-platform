@@ -36,6 +36,7 @@ export type ApiResponse<T> = {
 export type VillageOption = {
   value: string;
   label: string;
+  code?: string;
   fullAddress: string;
   hierarchy: {
     village: string;
