@@ -137,6 +137,38 @@ See `docs/data-cleaning.md` for counts and implementation notes.
 - `docs/architecture.md`: current application shape and next implementation steps
 - `docs/data-cleaning.md`: source data, cleaning rules, output counts, and project impact
 
+## Deployment
+
+The repo includes deployment config for a split frontend/API deployment.
+
+Backend on Render:
+
+- Blueprint file: `render.yaml`
+- Service root: `api`
+- Build command: `npm install`
+- Start command: `npm start`
+- Health check: `/health`
+- First deploy setting: `USE_PROCESSED_CSV=false`
+
+After creating the frontend deployment, set these Render environment variables to the Vercel URL:
+
+- `FRONTEND_URL`
+- `CORS_ORIGINS`
+
+Frontend on Vercel:
+
+- Project root: `frontend`
+- Config file: `frontend/vercel.json`
+- Framework: Vite
+- Build command: `npm run build`
+- Output directory: `dist`
+
+Set this Vercel environment variable to the Render API URL:
+
+```text
+VITE_API_BASE_URL=https://your-render-api.onrender.com/api/v1
+```
+
 ## Current status
 
 This repository is ready for product demo and API contract validation. The next backend milestone is replacing the mock geography repository with Prisma-backed queries over the cleaned dataset.
